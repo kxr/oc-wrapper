@@ -1,11 +1,14 @@
 #!/bin/bash
 
-LOGFILE="/var/log/oc.log"
+LOGFILE="~/.oc.log"
 OC_CMD="/opt/oc"
 USER="$(whoami)"
 DATE="$(date "+%d-%b-%Y %T")"
 SESSION="$(shuf -i 1-100000 -n 1)"
 ARGS="${@}"
+
+test -x "${OC_CMD}" || \
+    echo "ERROR: '${OC_CMD}' not found or not executable"
 
 # Log command invoked by the user
 echo "${DATE} ${USER}:${SESSION} ${0} ${ARGS})" >> ${LOGFILE}
