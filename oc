@@ -35,29 +35,28 @@ echo " ${ARGS} " | grep -q " delete " &>> /dev/null
 DEL="$?"
 
 if [ "${DEL}" == "0" ]; then
-    # Run `get` instead of delete to see what will be impacted and where
-    GET_DEL_ARGS=$(echo " ${ARGS} " | sed 's/ delete / get /')
-    GET_DEL_OUT=$(${OC_CMD} ${GET_DEL_ARGS} 2>&1)
-    GET_DEL_RET="$?"
-    if [ "${GET_DEL_RET}" == "0" ]; then
-        printf %"$(tput cols)"s | tr " " "="
-        echo "NOTE: 'oc ${ARGS}' will affect the following objects on ${OC_SERVER}:"
-        printf %"$(tput cols)"s | tr " " "="
-        echo
-        echo "${GET_DEL_OUT}"
-        printf %"$(tput cols)"s | tr " " "="
-        echo
-        echo "$(( $(echo "${GET_DEL_OUT}" | wc -l) - 1 )) objects will be deleted!"
-        echo "Press enter to continue or Ctrl+C to exit"
+    # Dry run the delete operation
+    DRY_DEL_OUT=$(${OC_CMD} ${ARGS} --dry-run=client 2>&1)
+    DRY_DEL_RET="$?"
+    if [ "${DRY_DEL_RET}" == "0" ]; then
+        NUM_DEL=$(echo "${DRY_DEL_OUT}" | grep "deleted" | wc -l)
+        echo "============="
+        echo "== DRY RUN =="
+        echo "============="
+        echo "${DRY_DEL_OUT}"
+        echo "============================================="
+        echo "${NUM_DEL} objects will be deleted!"
+        echo -n "Press [Enter] to continue or [Ctrl+C] to exit "
         read confirm
-        echo "${DATE} ${USER}:${SESSION} ${0} ${ARGS} CONFIRMED" >> ${LOGFILE}
+        echo "${DATE} ${USER}:${SESSION} ${0} ${ARGS} Confirmed deletion of ${NUM_DEL} objects: ${DRY_DEL_OUT}" >> ${LOGFILE}
     else
-        echo "ERROR: '${OC_CMD} ${GET_DEL_ARGS}' failed (${GET_DEL_RET}) with the following error"
-        echo "${GET_DEL_OUT}"
-        exit ${GET_DEL_RET}
+        echo "ERROR: '${OC_CMD} ${ARGS} --dry-run=client' failed (${DRY_DEL_RET}) with the following error:"
+        echo "${DRY_DEL_OUT}"
+        exit ${DRY_DEL_RET}
     fi
 fi
 
+# No delete operation detected, execute the oc command as it is
 ${OC_CMD} ${ARGS}
 OC_CMD_RET="$?"
 echo "${DATE} ${USER}:${SESSION} ${OC_CMD} ${ARGS} Returned: ${OC_CMD_RET}" >> ${LOGFILE}
