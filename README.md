@@ -24,9 +24,14 @@ To install this wrapper script:
     LOGFILE="/var/log/oc.log"
     ...
     ~~~
-- Move the origina `oc` binary to any location that is not in `PATH`. For example:
+- Move the original `oc` binary to any location that is not in `PATH`. For example:
     ~~~
-    # mv $(which oc 2> /dev/null) /opt/oc 2> /dev/null
+    # mv $(which oc) /opt/
+    ~~~
+- At this point `oc` command should not work. For example:
+    ~~~
+    # oc
+    bash: oc: command not found...
     ~~~
 - Set the location of the original `oc` binary in the wrapper script (oc) present in this repository. For example:
     ~~~
@@ -38,6 +43,7 @@ To install this wrapper script:
 - Place the `oc` wrapper script present in this repository in a location that is in `PATH`. For example:
     ~~~
     cp ./oc /usr/bin/
+    chmod +x /usr/bin/oc
     ~~~
 
 
