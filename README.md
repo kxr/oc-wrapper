@@ -31,11 +31,13 @@ To install this wrapper script:
 - Set the location of the original `oc` binary in the wrapper script (oc) present in this repository. For example:
     ~~~
     # vim ./oc
+    ...
     OC_CMD="/opt/oc"
+    ...
     ~~~ 
 - Place the `oc` wrapper script present in this repository in a location that is in `PATH`. For example:
     ~~~
-    cp ./oc
+    cp ./oc /usr/bin/
     ~~~
 
 
