@@ -1,0 +1,67 @@
+#!/bin/bash
+
+LOGFILE="/var/log/oc.log"
+OC_CMD="/opt/oc"
+USER="$(whoami)"
+DATE="$(date "+%d-%b-%Y %T")"
+SESSION="$(shuf -i 1-100000 -n 1)"
+ARGS="${@}"
+
+# Log command invoked by the user
+echo "${DATE} ${USER}:${SESSION} ${0} ${ARGS})" >> ${LOGFILE}
+
+
+# Find the current oc user
+OC_USER=$(${OC_CMD} whoami 2>&1)
+RET="$?"
+if [ "${RET}" != "0" ]; then
+    echo "${OC_USER}"
+    exit "${RET}"
+fi
+
+# Find the current oc server
+OC_SERVER=$(${OC_CMD} whoami --show-server  2>&1)
+RET="$?"
+if [ "${RET}" != "0" ]; then
+    echo "${OC_SERVER}"
+    exit "${RET}"
+fi
+
+# Log command invoked by the user
+echo "${DATE} ${USER}:${SESSION} OC_USER=${OC_USER} OC_SERVER=${OC_SERVER})" >> ${LOGFILE}
+
+# Check if delete operation is present
+echo " ${ARGS} " | grep -q " delete " &>> /dev/null
+DEL="$?"
+
+if [ "${DEL}" == "0" ]; then
+    # Run `get` instead of delete to see what will be impacted and where
+    GET_DEL_ARGS=$(echo " ${ARGS} " | sed 's/ delete / get /')
+    GET_DEL_OUT=$(${OC_CMD} ${GET_DEL_ARGS} 2>&1)
+    GET_DEL_RET="$?"
+    if [ "${GET_DEL_RET}" == "0" ]; then
+        printf %"$(tput cols)"s | tr " " "="
+        echo "NOTE: 'oc ${ARGS}' will affect the following objects on ${OC_SERVER}:"
+        printf %"$(tput cols)"s | tr " " "="
+        echo
+        echo "${GET_DEL_OUT}"
+        printf %"$(tput cols)"s | tr " " "="
+        echo
+        echo "$(( $(echo "${GET_DEL_OUT}" | wc -l) - 1 )) objects will be deleted!"
+        echo "Press enter to continue or Ctrl+C to exit"
+        read confirm
+        echo "${DATE} ${USER}:${SESSION} ${0} ${ARGS} CONFIRMED" >> ${LOGFILE}
+    else
+        echo "ERROR: '${OC_CMD} ${GET_DEL_ARGS}' failed (${GET_DEL_RET}) with the following error"
+        echo "${GET_DEL_OUT}"
+        exit ${GET_DEL_RET}
+    fi
+fi
+
+${OC_CMD} ${ARGS}
+OC_CMD_RET="$?"
+echo "${DATE} ${USER}:${SESSION} ${OC_CMD} ${ARGS} Returned: ${OC_CMD_RET}" >> ${LOGFILE}
+exit ${OC_CMD_RET}
+
+
+
