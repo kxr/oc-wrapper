@@ -6,9 +6,37 @@ A simple wrapper script for `oc` binary that:
 
 To install this wrapper script:
 
-- Move the origina `oc` binary to any location that is not in `PATH`. For example `/opt/oc`
-- Set the location of the original `oc` binary in the wrapper script (`oc`) present in this repository. For example `OC_CMD="/opt/oc"` 
-- Place the `oc` wrapper script present in this repository in a location that is in `PATH`. For example `/usr/bin/oc`
+- Clone this repository and cd into the repository directory:
+    ~~~
+    # git clone https://github.com/kxr/oc-wrapper
+    # cd oc-wrapper
+    ~~~
+
+- Create a log file and mark it writable as all users. For example:
+    ~~~
+    # sudo touch /var/log/oc.log
+    # sudo chmod 666 /var/log/oc.log
+    ~~~
+- Set the log file in the wrapper script (oc) present in this repositry. For example:
+    ~~~
+    # vim ./oc
+    ...
+    LOGFILE="/var/log/oc.log"
+    ...
+    ~~~
+- Move the origina `oc` binary to any location that is not in `PATH`. For example:
+    ~~~
+    # mv $(which oc 2> /dev/null) /opt/oc 2> /dev/null
+    ~~~
+- Set the location of the original `oc` binary in the wrapper script (oc) present in this repository. For example:
+    ~~~
+    # vim ./oc
+    OC_CMD="/opt/oc"
+    ~~~ 
+- Place the `oc` wrapper script present in this repository in a location that is in `PATH`. For example:
+    ~~~
+    cp ./oc
+    ~~~
 
 
 Demo:
