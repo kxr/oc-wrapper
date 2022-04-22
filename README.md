@@ -48,3 +48,4 @@ To install this wrapper script:
 
 
 Demo:
+[![asciicast](https://asciinema.org/a/wS58HgPF9yy6YEwvsMmSfbbqh.svg)](https://asciinema.org/a/wS58HgPF9yy6YEwvsMmSfbbqh)
